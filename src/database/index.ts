@@ -19,6 +19,19 @@ const pool = new Pool(poolConfig);
 
 // yeah, this is actually singleton object
 const database = {
+    // exporting the connection aka client, to perform queries
+    runQuery: async (sql: string, params?: any[]) => {
+        const client = await pool.connect();
+        try {
+            const result = await client.query(sql, params);
+            return result;
+        } catch (error) {
+            console.error("Error running query: ", error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    },
     runMigrations: async () => {
         const client = await pool.connect();
         try {
