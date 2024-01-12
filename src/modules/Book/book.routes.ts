@@ -6,5 +6,9 @@ import { Router } from "express";
 const router = Router();
 
 router.post("/", BookController.addBook);
+router.get("/search", BookController.searchBook);
+router.get("/", BookController.getAllBooks);
+router.get("/:id", BookController.getBookById);
+router.delete("/:id", BookController.deleteBookById);
 
 export default router;
