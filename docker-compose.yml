@@ -14,7 +14,7 @@ services:
     image: postgres:16.1-alpine3.18
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASS: itsupersecret
+      POSTGRES_PASSWORD: itsupersecret
       POSTGRES_DB: lib 
     ports:
       - 5432:5432

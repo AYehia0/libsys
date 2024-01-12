@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # remove old build
 rm -rf dist
