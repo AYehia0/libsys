@@ -8,8 +8,13 @@ services:
       - 8080:8080
     env_file:
       - .env
+    environment:
+      - NODE_ENV=cats_hehe
     depends_on:
       - db
+    volumes:
+      - ./src:/app/src
+      - ignore:/app/node_modules
   db:
     image: postgres:16.1-alpine3.18
     environment:
@@ -24,7 +29,4 @@ services:
 
 volumes:
   db-data:
-
-
-
-
+  ignore:

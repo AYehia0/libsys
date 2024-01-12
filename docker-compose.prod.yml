@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    # build the image from the dockerfile we created
+    build: .
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - db
+  db:
+    image: postgres:16.1-alpine3.18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: itsupersecret
+      POSTGRES_DB: lib 
+    ports:
+      - 5432:5432
+    # stateful data even when the container is shutdown
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

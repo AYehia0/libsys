@@ -14,7 +14,10 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wai
 RUN chmod +x /wait
 
 # Expose the port
-EXPOSE 3000
+EXPOSE 8080
 
-# Run the app with wait
-CMD /wait && npm run start
+# Set the NODE_ENV environment variable to production by default
+ENV NODE_ENV=production
+
+# Run the app with wait using the run.sh script
+CMD ./run.sh $NODE_ENV
