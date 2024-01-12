@@ -1,7 +1,9 @@
 # Library Management System
 
 This is a simple API created to manage a library system.
-The API is documented using swagger.
+
+~~The API is documented using swagger.~~
+I am going to use postman docs to share the api docs as I found swagger is pain to setup and make it auto register routes (I still may add this!)
 
 ## The Database
 ![](.assets/database_lib.png)
@@ -25,7 +27,11 @@ All the migrations are in `database/migrations/sql`
 ## Getting started
 You don't need anything to start, just run `docker-compose up -d --build` and you're ready to kick!
 
-For Debugging: `docker-compose up -d --build && docker-compose logs -f`
+<b>Running on development:</b>
+- Use `docker-compose.dev.yml` : `docker-compose -f docker-compose.dev.yml up -d --build && docker-compose -f docker-compose.dev.yml logs -f`
+
+<b>Running on production:</b>
+- Use `docker-compose.prod.yml` : `docker-compose -f docker-compose.prod.yml up -d --build`
 
 ## Non-functional Requirements
 
@@ -66,9 +72,11 @@ overdue.
     - [X] Choose a database and why ?
     - [X] Schema Desgin
     - [X] Normalization
-    - [ ] Choosing indexes
-- [ ] API Desgin: REST
-- [ ] Define a way to handle errors
+    - [X] Choosing indexes
+- [X] API Desgin: REST
+    - [X] Book routes
+    - [ ] Borrower routes
+- [X] Define a way to handle errors
 - [ ] Security : Authorization and Authentication
 - [ ] Documentations
 - [ ] Production Setup: HTTPs, Docker
