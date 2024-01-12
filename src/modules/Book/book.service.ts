@@ -3,8 +3,7 @@
 // allows for easy testing and maintainance
 
 // import the book model
-import { BookItem } from "./book.model";
-import { BookModel } from "./book.model";
+import { BookItem, BookModel } from "./book.model";
 
 // add a book to the database
 // for now we don't have a database so we will just return the book
@@ -46,4 +45,16 @@ export const searchBook = async (
 ) => {
     const books = await BookModel.searchBook(query, page, limit);
     return books;
+};
+
+export const updateBookById = async (
+    id: number,
+    body: BookItem,
+): Promise<BookItem> => {
+    // check if the book exists
+    const bookExists = await BookModel.getBookById(id);
+    // TODO: have a nice error handling one
+    if (!bookExists) throw new Error("Book not found");
+    const book = await BookModel.updateBookById(id, body);
+    return book;
 };

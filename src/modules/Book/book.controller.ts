@@ -75,3 +75,14 @@ export const searchBook = async (req: Request, res: Response) => {
         handleControllerError(res, err);
     }
 };
+
+export const updateBookById = async (req: Request, res: Response) => {
+    try {
+        const bookid = getBookByIdSchema.parse(req.params.id);
+        const bookData = createBookSchema.partial().parse(req.body) as BookItem;
+        const book = await BookService.updateBookById(bookid, bookData);
+        return res.status(200).json(book);
+    } catch (err) {
+        handleControllerError(res, err);
+    }
+};

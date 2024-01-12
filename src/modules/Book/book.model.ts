@@ -109,4 +109,29 @@ export class BookModel {
         ]);
         return result.rows;
     }
+    // update a book in the database by id
+    // given id and the book details, there could be missing details, only update the ones that are provided
+    public static async updateBookById(bookid: number, book: BookItem) {
+        const sql = `
+            UPDATE books
+            SET isbn = COALESCE($1, isbn),
+                title = COALESCE($2, title),
+                author = COALESCE($3, author),
+                genre = COALESCE($4, genre),
+                quantity = COALESCE($5, quantity),
+                shelf_location = COALESCE($6, shelf_location)
+            WHERE id = $7
+            RETURNING id, isbn, title, author, genre, quantity, shelf_location;
+        `;
+        const result = await database.runQuery(sql, [
+            book.isbn,
+            book.title,
+            book.author,
+            book.genre,
+            book.quantity,
+            book.shelf_location,
+            bookid,
+        ]);
+        return result.rows[0];
+    }
 }
