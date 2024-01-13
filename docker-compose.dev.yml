@@ -9,12 +9,11 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=${NODE_ENV}
+      - NODE_ENV=cats_are_cool
     depends_on:
       - db
     volumes:
       - ./src:/app/src
-      - ignore:/app/node_modules
   db:
     image: postgres:16.1-alpine3.18
     environment:
@@ -29,4 +28,3 @@ services:
 
 volumes:
   db-data:
-  ignore:
