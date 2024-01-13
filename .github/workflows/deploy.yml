@@ -14,15 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+      - name: Deploying docker container in server over SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Authenticating with server
-        run: doctl auth init -t "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" 
-      - name: SSH into Digital Ocean server and run app
-        run: |
-          doctl compute ssh lib \
-            --ssh-user "${{ secrets.DO_SERVER_USERNAME }}" \
-            --ssh-command 'cd /root/libsys && ./production_build.sh'
+          host: ${{ secrets.DO_SERVER_HOST }}
+          username: ${{ secrets.DO_SERVER_USERNAME }}
+          key: ${{ secrets.DO_SERVER_PRIVATE_KEY }}
+          script: cd /root/libsys && ./production_deploy.sh
