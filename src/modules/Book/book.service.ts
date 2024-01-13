@@ -73,3 +73,8 @@ export const returnBook = async (id: number): Promise<Borrowing> => {
     const borrowing = await BookModel.returnBook(id);
     return borrowing;
 };
+
+export const getOverdueBooks = async (page: number, limit: number) => {
+    const books = await BookModel.getOverdueBooks(page, limit);
+    return books;
+};

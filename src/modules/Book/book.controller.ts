@@ -106,3 +106,13 @@ export const returnBook = async (req: Request, res: Response) => {
         handleControllerError(res, err);
     }
 };
+
+export const getOverdueBooks = async (req: Request, res: Response) => {
+    try {
+        const { page, limit } = getAllBooksQuerySchema.parse(req.query);
+        const books = await BookService.getOverdueBooks(page, limit);
+        return res.status(200).json(books);
+    } catch (err) {
+        handleControllerError(res, err);
+    }
+};

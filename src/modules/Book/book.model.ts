@@ -181,7 +181,7 @@ export class BookModel {
     ): Promise<Borrowing> {
         const sql = `
             INSERT INTO borrowing (book_id, borrower_id, borrowed_at, returned_at, due_at)
-            VALUES ($1, $2, NOW(), NULL, NOW() + INTERVAL '${MAX_DUE_DAYS} days')
+            VALUES ($1, $2, NOW(), NULL, NOW() + INTERVAL '${MAX_DUE_DAYS} seconds')
             RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
         `;
         const result = await client.query(sql, [book_id, user_id]);
@@ -240,5 +240,21 @@ export class BookModel {
         `;
         const result = await database.runQuery(sql, [id]);
         return result.rows[0];
+    }
+
+    // get overdue books for all borrowers with pagination
+    static async getOverdueBooks(page: number, limit: number): Promise<Book[]> {
+        const offset = (page - 1) * limit;
+        const sql = `
+            SELECT books.id, books.title, books.isbn, borrowing.borrowed_at, borrowing.returned_at, borrowing.due_at, borrowing.borrower_id
+            FROM borrowing
+            INNER JOIN books ON borrowing.book_id = books.id
+            WHERE borrowing.due_at < NOW() AND borrowing.returned_at IS NULL
+            ORDER BY borrowing.due_at DESC
+            LIMIT $1 OFFSET $2;
+        `;
+
+        const result = await database.runQuery(sql, [limit, offset]);
+        return result.rows;
     }
 }

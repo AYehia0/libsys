@@ -10,6 +10,7 @@ router.post("/return/:id", BookController.returnBook);
 router.post("/", BookController.addBook);
 router.get("/search", BookController.searchBook);
 router.get("/", BookController.getAllBooks);
+router.get("/overdue", BookController.getOverdueBooks);
 router.get("/:id", BookController.getBookById);
 router.delete("/:id", BookController.deleteBookById);
 router.patch("/:id", BookController.updateBookById);
