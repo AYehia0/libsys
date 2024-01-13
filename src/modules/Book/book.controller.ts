@@ -86,3 +86,23 @@ export const updateBookById = async (req: Request, res: Response) => {
         handleControllerError(res, err);
     }
 };
+
+export const borrowBook = async (req: Request, res: Response) => {
+    try {
+        const { bookid, borrowerid } = req.body;
+        const borrowing = await BookService.borrowBook(bookid, borrowerid);
+        return res.status(200).json(borrowing);
+    } catch (err) {
+        handleControllerError(res, err);
+    }
+};
+
+export const returnBook = async (req: Request, res: Response) => {
+    try {
+        const bookid = getBookByIdSchema.parse(req.params.id);
+        const borrowing = await BookService.returnBook(bookid);
+        return res.status(200).json(borrowing);
+    } catch (err) {
+        handleControllerError(res, err);
+    }
+};

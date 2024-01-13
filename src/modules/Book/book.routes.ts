@@ -5,6 +5,8 @@ import { Router } from "express";
 // create the book Router
 const router = Router();
 
+router.post("/borrow", BookController.borrowBook);
+router.post("/return/:id", BookController.returnBook);
 router.post("/", BookController.addBook);
 router.get("/search", BookController.searchBook);
 router.get("/", BookController.getAllBooks);

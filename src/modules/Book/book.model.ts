@@ -7,6 +7,9 @@
 
 // import the database connection
 import database from "../../database";
+import { BorrowerModel } from "../Borrower/borrower.model";
+
+const MAX_DUE_DAYS = 14;
 
 export interface BookItem {
     isbn: string;
@@ -19,6 +22,17 @@ export interface BookItem {
 
 // Separation for senerios where we need to assert a book without an id
 export interface Book extends BookItem {
+    id: number;
+}
+
+export interface BorrowingItem {
+    borrower_id: number;
+    book_id: number;
+    borrowed_at: Date;
+    returned_at: Date;
+    due_at: Date;
+}
+export interface Borrowing extends BorrowingItem {
     id: number;
 }
 
@@ -132,6 +146,99 @@ export class BookModel {
             book.shelf_location,
             bookid,
         ]);
+        return result.rows[0];
+    }
+    private static async getBookByIdForUpdate(
+        client: any,
+        id: number,
+    ): Promise<Book> {
+        const sql = `
+            SELECT * FROM books
+            WHERE id = $1
+            FOR UPDATE;
+        `;
+        const result = await client.query(sql, [id]);
+        return result.rows[0];
+    }
+    private static async updateBookQuantity(
+        client: any,
+        id: number,
+        quantity: number,
+    ): Promise<Book> {
+        const sql = `
+            UPDATE books
+            SET quantity = $1
+            WHERE id = $2
+            RETURNING id, isbn, title, author, genre, quantity, shelf_location;
+        `;
+        const result = await client.query(sql, [quantity, id]);
+        return result.rows[0];
+    }
+    private static async createBorrowing(
+        client: any,
+        book_id: number,
+        user_id: number,
+    ): Promise<Borrowing> {
+        const sql = `
+            INSERT INTO borrowing (book_id, borrower_id, borrowed_at, returned_at, due_at)
+            VALUES ($1, $2, NOW(), NULL, NOW() + INTERVAL '${MAX_DUE_DAYS} days')
+            RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
+        `;
+        const result = await client.query(sql, [book_id, user_id]);
+        return result.rows[0];
+    }
+
+    static async borrowBook(id: number, user_id: number): Promise<Borrowing> {
+        // use the database.runTransaction function to run the transaction
+        const borrowing = await database.runTransaction(async (client) => {
+            // get the book by id and lock the row for update
+            const book = await BookModel.getBookByIdForUpdate(client, id);
+            // check if the book isn't null
+            if (!book || book.quantity <= 0) {
+                throw new Error("Book not available");
+            }
+            // check if the user/borrower exists
+            const borrower = await BorrowerModel.getBorrowerById(user_id);
+
+            if (!borrower) {
+                throw new Error("Borrower not found");
+            }
+
+            const updatedBook = await BookModel.updateBookQuantity(
+                client,
+                book.id,
+                book.quantity - 1,
+            );
+            const borrowing = await BookModel.createBorrowing(
+                client,
+                updatedBook.id,
+                user_id,
+            );
+            return borrowing;
+        });
+
+        return borrowing;
+    }
+    // return a book by id, update the borrowing record set the returned_at to NOW() and status to returned
+    static async returnBook(id: number): Promise<Borrowing> {
+        // check if the book already returned by : CONSTRAINT check_borrowing CHECK (borrowed_at < returned_at)
+        // if the book already returned, throw an error
+        let sql = `
+            SELECT * FROM borrowing
+            WHERE id = $1
+            AND returned_at IS NOT NULL;
+        `;
+        const isReturned = await database.runQuery(sql, [id]);
+        if (isReturned.rows.length > 0) {
+            throw new Error("Book already returned");
+        }
+        sql = `
+            UPDATE borrowing
+            SET returned_at = NOW()
+            WHERE id = $1
+            RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
+        `;
+        const result = await database.runQuery(sql, [id]);
         return result.rows[0];
     }
 }

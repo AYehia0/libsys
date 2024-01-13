@@ -32,6 +32,21 @@ const database = {
             client.release();
         }
     },
+    runTransaction: async (callback: (client: any) => Promise<any>) => {
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+            const result = await callback(client);
+            await client.query("COMMIT");
+            return result;
+        } catch (error) {
+            await client.query("ROLLBACK");
+            console.error("Error running transaction: ", error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    },
     runMigrations: async () => {
         const client = await pool.connect();
         try {

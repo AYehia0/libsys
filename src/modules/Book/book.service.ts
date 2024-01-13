@@ -3,7 +3,7 @@
 // allows for easy testing and maintainance
 
 // import the book model
-import { BookItem, BookModel } from "./book.model";
+import { BookItem, BookModel, Borrowing } from "./book.model";
 
 // add a book to the database
 // for now we don't have a database so we will just return the book
@@ -57,4 +57,19 @@ export const updateBookById = async (
     if (!bookExists) throw new Error("Book not found");
     const book = await BookModel.updateBookById(id, body);
     return book;
+};
+
+// the book can be borrowed by a user
+export const borrowBook = async (
+    id: number,
+    user_id: number,
+): Promise<Borrowing> => {
+    const borrowing = await BookModel.borrowBook(id, user_id);
+    return borrowing;
+};
+
+// the book can be returned by a user
+export const returnBook = async (id: number): Promise<Borrowing> => {
+    const borrowing = await BookModel.returnBook(id);
+    return borrowing;
 };
