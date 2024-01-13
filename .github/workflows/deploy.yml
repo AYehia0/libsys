@@ -20,7 +20,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Authenticating with server
-        run: doctl auth init
+        run: doctl auth init --context production
 
       - name: SSH into Digital Ocean server and run app
         run: |
