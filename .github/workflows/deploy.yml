@@ -21,7 +21,7 @@ jobs:
 
       - name: SSH into Digital Ocean server and run app
         run: |
-          doctl compute ssh --context production \
-            --ssh-private-key-path "${{ secrets.DO_SERVER_PRIVATE_KEY }}" \
+          doctl compute ssh lib --context production \
+            --ssh-key-path "${{ secrets.DO_SERVER_PRIVATE_KEY }}" \
             --ssh-user "${{ secrets.DO_SERVER_USERNAME }}" \
             "${{ secrets.DO_SERVER_HOST }}" -- 'cd /root/libsys && ./production_build.sh'
