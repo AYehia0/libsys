@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as BorrowerService from "./borrower.service";
-import { handleControllerError } from "../../utils/errors";
+import { handleControllerError } from "../../utils/controller.errors";
 import {
     getPaginationQuerySchema,
     idSchema,

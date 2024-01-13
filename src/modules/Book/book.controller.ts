@@ -8,7 +8,7 @@ import {
     getSearchQuerySchema,
 } from "./book.validation";
 import { BookItem } from "./book.model";
-import { handleControllerError } from "../../utils/errors";
+import { handleControllerError } from "../../utils/controller.errors";
 
 // add a book controller
 export const addBook = async (req: Request, res: Response) => {
