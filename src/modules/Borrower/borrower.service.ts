@@ -2,6 +2,7 @@
 // the registration requires the following information: name, and email (for simplicity)
 
 import { BorrowerItem, Borrower, BorrowerModel } from "./borrower.model";
+import { Book } from "../Book/book.model";
 
 export const registerBorrower = async (
     name: string,
@@ -36,4 +37,8 @@ export const getAllBorrowers = async (
     limit: number,
 ): Promise<Borrower[]> => {
     return await BorrowerModel.getAllBorrowers(page, limit);
+};
+
+export const getBorrowedBooks = async (borrowerId: number): Promise<Book[]> => {
+    return await BorrowerModel.getBorrowedBooks(borrowerId);
 };

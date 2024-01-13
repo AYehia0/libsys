@@ -80,3 +80,13 @@ export const getAllBorrowers = async (req: Request, res: Response) => {
         handleControllerError(res, err);
     }
 };
+
+export const getBorrowedBooks = async (req: Request, res: Response) => {
+    try {
+        const borrowerId = idSchema.parse(req.params.id);
+        const books = await BorrowerService.getBorrowedBooks(borrowerId);
+        return res.status(200).json(books);
+    } catch (err) {
+        handleControllerError(res, err);
+    }
+};

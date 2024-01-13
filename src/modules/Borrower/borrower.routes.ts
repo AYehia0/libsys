@@ -5,6 +5,7 @@ import * as BorrowerController from "./borrower.controller";
 const router = Router();
 
 router.post("/register", BorrowerController.registerBorrower);
+router.get("/:id/books", BorrowerController.getBorrowedBooks);
 router.get("/", BorrowerController.getAllBorrowers);
 router.patch("/:id", BorrowerController.updateBorrower);
 router.get("/:id", BorrowerController.getBorrowerById);

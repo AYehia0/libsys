@@ -1,4 +1,5 @@
 import database from "../../database";
+import { Book } from "../Book/book.model";
 
 export interface BorrowerItem {
     name: string;
@@ -85,6 +86,19 @@ export class BorrowerModel {
         `;
 
         const result = await database.runQuery(sql, [limit, offset]);
+        return result.rows;
+    }
+    // FIXME: this actually doesn't return Book[] but Book[] - book.created_at + borrowed_at, returned_at, due_at
+    static async getBorrowedBooks(borrowerId: number): Promise<Book[]> {
+        const sql = `
+            SELECT books.id, books.title, books.author, books.genre, books.isbn, borrowing.borrowed_at, borrowing.returned_at, borrowing.due_at
+            FROM books
+            INNER JOIN borrowing ON books.id = borrowing.book_id
+            WHERE borrowing.borrower_id = $1
+            ORDER BY borrowing.due_at DESC;
+        `;
+
+        const result = await database.runQuery(sql, [borrowerId]);
         return result.rows;
     }
 }
