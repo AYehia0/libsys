@@ -4,12 +4,12 @@ export const jsonResponse = (
     status: string,
     statusCode: number,
     message: string,
-    data?: any,
+    details?: any,
 ) => {
     return {
         status,
         statusCode,
         message,
-        data,
+        details,
     };
 };

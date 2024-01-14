@@ -71,7 +71,14 @@ export const handleControllerError = (res: Response, err: unknown) => {
         case ZodError:
             return res
                 .status(400)
-                .json(jsonResponse("error", 400, newError.message));
+                .json(
+                    jsonResponse(
+                        "error",
+                        400,
+                        "Validation Error",
+                        JSON.parse(newError.message),
+                    ),
+                );
 
         case NotFoundError:
             return res
