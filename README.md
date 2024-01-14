@@ -87,6 +87,10 @@ I have some takes on the design I came up with but for sake of limited time and 
 - Show borrowed books: `/api/v1/borrowers/<user_id>/books`, can you see it ?
 - Search for books: `/api/v1/books/search?title=the&author=charles%dickens&genre=literature&isbn=978&limit=10&page=2` combining params - will get all the books which have "the" in the title by Charles Dickens on genre: Literature and so on.
 - Getting overdue books: wellll is it better to keep it separate from the `/books` ?
+- Usually updating email isn't realistic!
+
+## Notes
+- Currently, I am throwing database errors as server errors : `500` lol
 
 ## Todo
 - [X] Desgin an archicture to follow
@@ -98,9 +102,9 @@ I have some takes on the design I came up with but for sake of limited time and 
 - [X] API Desgin: REST
     - [X] Book routes
     - [X] Borrower routes
-- [ ] Security : Authorization and Authentication
-- [ ] Documentations
-- [ ] Production Setup: HTTPs, Docker
-- [ ] Define a way to handle errors
+- [X] Security : Authorization and Authentication
+- [X] Documentations
+- [X] Production Setup: HTTPs, Docker
+- [X] Define a way to handle errors : throw the errors from the service with status codes and check types on controller
 - [ ] Testing
 - [ ] Use absoulte paths in TS
