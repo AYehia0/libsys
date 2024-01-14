@@ -1,9 +1,6 @@
 # Library Management System
 
-This is a simple API created to manage libraries.
-
-~~The API is documented using swagger.~~
-I am going to use postman docs to share the api docs as I found swagger is pain to setup and make it auto register routes (I still may add this!)
+Simple API created to manage your library.
 
 ## Contents
 - [Overview](#overview)
@@ -14,7 +11,9 @@ I am going to use postman docs to share the api docs as I found swagger is pain 
     - [Choosing The Database](#choosing-the-database)
     - [Database Migrations](#database-migrations)
 - [Getting Started](#getting-started)
+- [Features](#features)
 - [Takes on Design](#takes-on-design)
+- [Notes](#notes)
 
 ## Overview
 
@@ -77,7 +76,18 @@ You don't need anything to start, just `docker-compose` and you're ready to kick
 - Use `docker-compose.dev.yml` : `docker-compose -f docker-compose.dev.yml up -d --build && docker-compose -f docker-compose.dev.yml logs -f`
 
 <b>Running on production:</b>
-- Use `docker-compose.prod.yml` : `docker-compose -f docker-compose.prod.yml up -d --build`
+- Use `docker-compose.prod.yml` : `docker-compose -f docker-compose.prod.yml --env-file .prod.env up -d --build`
+
+If you have postman installed, or you have an account, you can test it out : [here](https://documenter.getpostman.com/view/20745767/2s9YsNeWEQ)
+
+![](./.assets/postman.png)
+
+## Features
+While the project is pretty simple and it just meets the requirements, it's worth mentioning that is has some cool features beside the already defined ones in the requirements:
+- All CRUD operations are satisfied in a clean way
+- API has simple rate limitation an caching on GET routes
+- Database has indexes on most requested data as the system is mainly read heavy
+- It's dockerized and can be setuped in one command
 
 ## Takes on Design
 I have some takes on the design I came up with but for sake of limited time and loosy requirements. Following the requirements (bare minimal) forces me to make some weird routes:
@@ -91,6 +101,7 @@ I have some takes on the design I came up with but for sake of limited time and 
 
 ## Notes
 - Currently, I am throwing database errors as server errors : `500` lol
+- `npm run dev` won't work as the database is running in the container
 
 ## Todo
 - [X] Desgin an archicture to follow
@@ -108,3 +119,4 @@ I have some takes on the design I came up with but for sake of limited time and 
 - [X] Define a way to handle errors : throw the errors from the service with status codes and check types on controller
 - [ ] Testing
 - [ ] Use absoulte paths in TS
+- [ ] separate server errors from db errors
