@@ -1,0 +1,1 @@
+ALTER TABLE borrowers ADD COLUMN password VARCHAR(255) NOT NULL DEFAULT 'password';

@@ -1,9 +1,11 @@
 import database from "../../database";
+import { ConflictError } from "../../utils/controller.errors";
 import { Book } from "../Book/book.model";
 
 export interface BorrowerItem {
     name: string;
     email: string;
+    password: string;
 }
 
 export interface Borrower extends BorrowerItem {
@@ -15,14 +17,15 @@ export class BorrowerModel {
         borrower: Omit<Borrower, "id">,
     ): Promise<Borrower> {
         const sql = `
-            INSERT INTO borrowers (name, email)
-            VALUES ($1, $2)
+            INSERT INTO borrowers (name, email, password)
+            VALUES ($1, $2, $3)
             RETURNING id, name, email, created_at;
         `;
 
         const result = await database.runQuery(sql, [
             borrower.name,
             borrower.email,
+            borrower.password,
         ]);
         return result.rows[0];
     }
@@ -49,7 +52,13 @@ export class BorrowerModel {
             borrower.email,
             id,
         ]);
-        // return true if the borrower was updated
+
+        // check the reason for the update failure, not the best way to do this but this is my sql world works :(
+        if (result.rowCount === 0) {
+            const borrower = await this.getBorrowerById(id);
+            if (borrower.email === borrower.email)
+                throw new ConflictError("Email already exists");
+        }
         return result.rowCount ? true : false;
     }
     static async getBorrowerById(id: number): Promise<Borrower> {
@@ -100,5 +109,16 @@ export class BorrowerModel {
 
         const result = await database.runQuery(sql, [borrowerId]);
         return result.rows;
+    }
+
+    static async getBorrowerByEmail(email: string): Promise<Borrower> {
+        const sql = `
+            SELECT id, name, email, password, created_at
+            FROM borrowers
+            WHERE email = $1;
+        `;
+
+        const result = await database.runQuery(sql, [email]);
+        return result.rows[0];
     }
 }

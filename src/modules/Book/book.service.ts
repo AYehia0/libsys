@@ -3,6 +3,7 @@
 // allows for easy testing and maintainance
 
 // import the book model
+import { NotFoundError } from "../../utils/controller.errors";
 import { BookItem, BookModel, Borrowing } from "./book.model";
 
 // add a book to the database
@@ -14,7 +15,7 @@ export const addBook = async (body: any): Promise<BookItem> => {
         author: body.author,
         genre: body.genre,
         quantity: body.quantity as number,
-        shelf_location: body.shelf_location as number,
+        shelf_location: body.shelf_location,
     };
 
     // add the book to the database
@@ -54,7 +55,7 @@ export const updateBookById = async (
     // check if the book exists
     const bookExists = await BookModel.getBookById(id);
     // TODO: have a nice error handling one
-    if (!bookExists) throw new Error("Book not found");
+    if (!bookExists) throw new NotFoundError("Book not found");
     const book = await BookModel.updateBookById(id, body);
     return book;
 };
@@ -69,8 +70,11 @@ export const borrowBook = async (
 };
 
 // the book can be returned by a user
-export const returnBook = async (id: number): Promise<Borrowing> => {
-    const borrowing = await BookModel.returnBook(id);
+export const returnBook = async (
+    borrowerid: number,
+    id: number,
+): Promise<Borrowing> => {
+    const borrowing = await BookModel.returnBook(borrowerid, id);
     return borrowing;
 };
 
