@@ -4,7 +4,10 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-dotenv.config();
+// choose .env file based on the environment (development or production)
+dotenv.config({
+    path: process.env.NODE_ENV === "production" ? ".prod.env" : ".env",
+});
 
 const app = express();
 
@@ -20,12 +23,16 @@ import bookRouter from "./modules/Book/book.routes";
 import borrowerRouter from "./modules/Borrower/borrower.routes";
 import { handle404Error } from "./utils/404.errors";
 import { welcomeAPI } from "./utils/shared-routes";
+import * as cache from "route-cache";
+import rateLimit from "express-rate-limit";
+import { limiterConfig } from "./utils/rate-limiter.config";
 
+app.use(rateLimit(limiterConfig));
 app.get("/", welcomeAPI);
-app.use(handle404Error);
 
 // the routes goes here
-app.use(`${API_URL}/books`, bookRouter);
+app.use(`${API_URL}/books`, cache.cacheSeconds(20), bookRouter);
 app.use(`${API_URL}/borrowers`, borrowerRouter);
+app.use(handle404Error);
 
 export default app;
