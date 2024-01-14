@@ -4,6 +4,7 @@ import { handleControllerError } from "../../utils/controller.errors";
 import {
     getPaginationQuerySchema,
     idSchema,
+    loginBorrowerSchema,
     registerBorrowerSchema,
 } from "./borrower.validation";
 import { BorrowerItem } from "./borrower.model";
@@ -11,9 +12,27 @@ import { BorrowerItem } from "./borrower.model";
 // register borrower/user
 export const registerBorrower = async (req: Request, res: Response) => {
     try {
-        const { name, email } = registerBorrowerSchema.parse(req.body);
-        const borrower = await BorrowerService.registerBorrower(name, email);
+        const { name, email, password } = registerBorrowerSchema.parse(
+            req.body,
+        );
+        const borrower = await BorrowerService.registerBorrower(
+            name,
+            email,
+            password,
+        );
         return res.status(201).json(borrower);
+    } catch (err) {
+        handleControllerError(res, err);
+    }
+};
+
+export const loginBorrower = async (req: Request, res: Response) => {
+    try {
+        const { email, password } = loginBorrowerSchema.parse(req.body);
+        const token = await BorrowerService.loginBorrower(email, password);
+        return res.status(200).json({
+            token,
+        });
     } catch (err) {
         handleControllerError(res, err);
     }
@@ -21,19 +40,14 @@ export const registerBorrower = async (req: Request, res: Response) => {
 
 export const updateBorrower = async (req: Request, res: Response) => {
     try {
-        const borrowerId = idSchema.parse(req.params.id);
         const borrowerData = registerBorrowerSchema
             .partial()
             .parse(req.body) as BorrowerItem;
-        const borrower = await BorrowerService.updateBorrower(
-            borrowerId,
-            borrowerData,
-        );
-        if (!borrower)
-            return res.status(404).json({
-                message: `Borrower with id ${borrowerId} not found`,
-            });
-        return res.status(200).json(borrower);
+
+        await BorrowerService.updateBorrower(req.borrower.id, borrowerData);
+        return res.status(200).json({
+            message: "Borrower was updated successfully",
+        });
     } catch (err) {
         handleControllerError(res, err);
     }
@@ -83,8 +97,7 @@ export const getAllBorrowers = async (req: Request, res: Response) => {
 
 export const getBorrowedBooks = async (req: Request, res: Response) => {
     try {
-        const borrowerId = idSchema.parse(req.params.id);
-        const books = await BorrowerService.getBorrowedBooks(borrowerId);
+        const books = await BorrowerService.getBorrowedBooks(req.borrower.id);
         return res.status(200).json(books);
     } catch (err) {
         handleControllerError(res, err);

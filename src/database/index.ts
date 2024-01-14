@@ -32,6 +32,7 @@ const database = {
             client.release();
         }
     },
+    // FIXME: fix the types here
     runTransaction: async (callback: (client: any) => Promise<any>) => {
         const client = await pool.connect();
         try {

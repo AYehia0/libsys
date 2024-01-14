@@ -8,7 +8,7 @@ export const createBookSchema = z.object({
     author: z.string().nonempty("Book must have an author").max(MAX_LENGTH),
     genre: z.string().max(50),
     quantity: z.number().int().min(0),
-    shelf_location: z.number().int().min(0),
+    shelf_location: z.string().min(2).max(255),
     isbn: z.string().min(1).max(MAX_LENGTH),
 });
 

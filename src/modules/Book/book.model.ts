@@ -7,6 +7,7 @@
 
 // import the database connection
 import database from "../../database";
+import { ForbiddenError, NotFoundError } from "../../utils/controller.errors";
 import { BorrowerModel } from "../Borrower/borrower.model";
 
 const MAX_DUE_DAYS = 14;
@@ -17,7 +18,7 @@ export interface BookItem {
     author: string;
     genre: string;
     quantity: number;
-    shelf_location: number;
+    shelf_location: string;
 }
 
 // Separation for senerios where we need to assert a book without an id
@@ -194,15 +195,13 @@ export class BookModel {
             // get the book by id and lock the row for update
             const book = await BookModel.getBookByIdForUpdate(client, id);
             // check if the book isn't null
-            if (!book || book.quantity <= 0) {
-                throw new Error("Book not available");
-            }
+            if (!book || book.quantity <= 0)
+                throw new NotFoundError("Book not found");
+
             // check if the user/borrower exists
             const borrower = await BorrowerModel.getBorrowerById(user_id);
 
-            if (!borrower) {
-                throw new Error("Borrower not found");
-            }
+            if (!borrower) throw new NotFoundError("Borrower not found");
 
             const updatedBook = await BookModel.updateBookQuantity(
                 client,
@@ -220,26 +219,34 @@ export class BookModel {
         return borrowing;
     }
     // return a book by id, update the borrowing record set the returned_at to NOW() and status to returned
-    static async returnBook(id: number): Promise<Borrowing> {
-        // check if the book already returned by : CONSTRAINT check_borrowing CHECK (borrowed_at < returned_at)
-        // if the book already returned, throw an error
-        let sql = `
-            SELECT * FROM borrowing
-            WHERE id = $1
-            AND returned_at IS NOT NULL;
-        `;
-        const isReturned = await database.runQuery(sql, [id]);
-        if (isReturned.rows.length > 0) {
-            throw new Error("Book already returned");
-        }
-        sql = `
-            UPDATE borrowing
-            SET returned_at = NOW()
-            WHERE id = $1
-            RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
-        `;
-        const result = await database.runQuery(sql, [id]);
-        return result.rows[0];
+    static async returnBook(
+        borrowerid: number,
+        id: number,
+    ): Promise<Borrowing> {
+        // if the book already returned or the borrower didn't borrow it, throw an error
+        // use a transaction to update the borrowing record and the book quantity
+        const borrowing = await database.runTransaction(async (client) => {
+            const sql = `
+                UPDATE borrowing
+                SET returned_at = NOW()
+                WHERE book_id = $1 AND borrower_id = $2 AND returned_at IS NULL
+                RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
+            `;
+            const result = await client.query(sql, [id, borrowerid]);
+            if (!result.rows.length)
+                throw new ForbiddenError(
+                    "Book either returned or not borrowed",
+                );
+
+            const book = await BookModel.getBookByIdForUpdate(client, id);
+            await BookModel.updateBookQuantity(
+                client,
+                book.id,
+                book.quantity + 1,
+            );
+            return result.rows[0];
+        });
+        return borrowing;
     }
 
     // get overdue books for all borrowers with pagination
