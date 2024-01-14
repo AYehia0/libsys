@@ -10,6 +10,7 @@ if (process.env.NODE_ENV === "production") {
         key: fs.readFileSync("./privkey.pem"),
         cert: fs.readFileSync("./fullchain.pem"),
     };
+    database.runMigrations();
     https.createServer(sslConfig, app).listen(process.env.PORT);
 } else {
     app.listen(port, () => {
