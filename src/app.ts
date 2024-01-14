@@ -23,7 +23,6 @@ import bookRouter from "./modules/Book/book.routes";
 import borrowerRouter from "./modules/Borrower/borrower.routes";
 import { handle404Error } from "./utils/404.errors";
 import { welcomeAPI } from "./utils/shared-routes";
-import * as cache from "route-cache";
 import rateLimit from "express-rate-limit";
 import { limiterConfig } from "./utils/rate-limiter.config";
 
@@ -31,7 +30,7 @@ app.use(rateLimit(limiterConfig));
 app.get("/", welcomeAPI);
 
 // the routes goes here
-app.use(`${API_URL}/books`, cache.cacheSeconds(20), bookRouter);
+app.use(`${API_URL}/books`, bookRouter);
 app.use(`${API_URL}/borrowers`, borrowerRouter);
 app.use(handle404Error);
 
