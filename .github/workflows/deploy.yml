@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - production
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.assets/**'
 jobs:
   deploy:
     runs-on: ubuntu-latest
