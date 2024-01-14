@@ -1,2 +1,4 @@
 node_modules
 dist
+privkey.pem
+fullchain.pem
