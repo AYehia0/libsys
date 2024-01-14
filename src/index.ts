@@ -7,12 +7,8 @@ const port = parseInt(process.env.PORT as string, 10) || 3000;
 
 if (process.env.NODE_ENV === "production") {
     const sslConfig = {
-        key: fs.readFileSync(
-            "/etc/letsencrypt/live/library.ayehia0.info/privkey.pem",
-        ),
-        cert: fs.readFileSync(
-            "/etc/letsencrypt/live/library.ayehia0.info/fullchain.pem",
-        ),
+        key: fs.readFileSync("./privkey.pem"),
+        cert: fs.readFileSync("./fullchain.pem"),
     };
     https.createServer(sslConfig, app).listen(process.env.PORT);
 } else {
