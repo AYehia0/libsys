@@ -21,7 +21,6 @@ services:
     # stateful data even when the container is shutdown
     volumes:
       - db-data:/var/lib/postgresql/data
-      - /etc/letsencrypt/live/library.ayehia0.info:/etc/letsencrypt/live/library.ayehia0.info
 
 volumes:
   db-data:
