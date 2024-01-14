@@ -10,7 +10,7 @@ import database from "../../database";
 import { ForbiddenError, NotFoundError } from "../../utils/controller.errors";
 import { BorrowerModel } from "../Borrower/borrower.model";
 
-const MAX_DUE_DAYS = 14;
+const MAX_DUE_DAYS = 30;
 
 export interface BookItem {
     isbn: string;
