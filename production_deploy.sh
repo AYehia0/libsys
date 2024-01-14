@@ -7,4 +7,4 @@ echo "Stopping Docker Compose"
 docker-compose -f docker-compose.prod.yml down
 
 echo "Running Docker Compose"
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose -f docker-compose.prod.yml --env-file .prod.env up -d --build

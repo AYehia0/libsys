@@ -6,8 +6,6 @@ services:
     build: .
     ports:
       - ${PORT}:${PORT}
-    env_file:
-      - .env
     environment:
       - NODE_ENV=${NODE_ENV}
     depends_on:

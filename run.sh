@@ -6,7 +6,6 @@ wget https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wa
 
 chmod +x wait
 
-ls -la
 if [ "$1" = "production" ]; then
     echo "Running on production server"
     ./wait && npm run start

@@ -1,15 +1,14 @@
+# Development 
 version: '3.8'
 
 services:
   app:
     # build the image from the dockerfile we created
     build: .
+    environment:
+      - NODE_ENV=cats_hehe
     ports:
       - ${PORT}:${PORT}
-    env_file:
-      - .env
-    environment:
-      - NODE_ENV=cats_are_cool
     depends_on:
       - db
     volumes:
