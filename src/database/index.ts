@@ -26,7 +26,6 @@ const database = {
             const result = await client.query(sql, params);
             return result;
         } catch (error) {
-            console.error("Error running query: ", error);
             throw error;
         } finally {
             client.release();
@@ -42,7 +41,6 @@ const database = {
             return result;
         } catch (error) {
             await client.query("ROLLBACK");
-            console.error("Error running transaction: ", error);
             throw error;
         } finally {
             client.release();
