@@ -1,23 +1,15 @@
-import fs from "fs";
-import https from "https";
-import app from "./app";
-import database from "./database";
+// it's important to configure the env before creating anything
+import { configureEnv } from "./utils/env";
+configureEnv();
 
-const port = parseInt(process.env.PORT as string, 10) || 3000;
+import createApp from "./app";
 
-if (process.env.NODE_ENV === "production") {
-    const sslConfig = {
-        key: fs.readFileSync("./privkey.pem"),
-        cert: fs.readFileSync("./fullchain.pem"),
-    };
-    database.runMigrations();
-    https.createServer(sslConfig, app).listen(process.env.PORT);
-} else {
-    app.listen(port, () => {
-        console.log(
-            `Listening on port ${port}, running on: ${process.env.NODE_ENV}`,
-        );
-        console.log("Running db migrations...");
-        database.runMigrations();
-    });
-}
+// this is a dirty hack to make sure the database is initialized before the server starts
+import database from "./database/index";
+import { initServer } from "./utils/init";
+
+const app = createApp();
+
+initServer(app, database).then((server) => {
+    server.start();
+});
