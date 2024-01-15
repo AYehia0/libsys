@@ -99,8 +99,11 @@ export const borrowBook = async (req: Request, res: Response) => {
 
 export const returnBook = async (req: Request, res: Response) => {
     try {
-        const bookid = getBookByIdSchema.parse(req.params.id);
-        const borrowing = await BookService.returnBook(req.borrower.id, bookid);
+        const borrowingid = getBookByIdSchema.parse(req.params.id);
+        const borrowing = await BookService.returnBook(
+            req.borrower.id,
+            borrowingid,
+        );
         return res.status(200).json(borrowing);
     } catch (err) {
         handleControllerError(res, err);
