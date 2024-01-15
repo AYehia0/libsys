@@ -102,6 +102,8 @@ I have some takes on the design I came up with but for sake of limited time and 
 ## Notes
 - Currently, I am throwing database errors as server errors : `500` lol
 - `npm run dev` won't work as the database is running in the container
+- There are some unhandled cases like what happens when the user returns a book that has been deleted
+- I know that throwing errors are expensive and should be used a lot specially in JS world
 
 ## Todo
 - [X] Desgin an archicture to follow
