@@ -7,7 +7,11 @@
 
 // import the database connection
 import database from "../../database";
-import { ForbiddenError, NotFoundError } from "../../utils/controller.errors";
+import {
+    ConflictError,
+    ForbiddenError,
+    NotFoundError,
+} from "../../utils/controller.errors";
 import { BorrowerModel } from "../Borrower/borrower.model";
 
 const MAX_DUE_DAYS = 30;
@@ -164,15 +168,16 @@ export class BookModel {
     private static async updateBookQuantity(
         client: any,
         id: number,
-        quantity: number,
+        updown: number,
     ): Promise<Book> {
+        // either increase or decrease the quantity of the book by updown
         const sql = `
             UPDATE books
-            SET quantity = $1
+            SET quantity = quantity + $1
             WHERE id = $2
             RETURNING id, isbn, title, author, genre, quantity, shelf_location;
         `;
-        const result = await client.query(sql, [quantity, id]);
+        const result = await client.query(sql, [updown, id]);
         return result.rows[0];
     }
     private static async createBorrowing(
@@ -196,17 +201,20 @@ export class BookModel {
             const book = await BookModel.getBookByIdForUpdate(client, id);
             // check if the book isn't null
             if (!book || book.quantity <= 0)
-                throw new NotFoundError("Book not found");
+                throw new ConflictError(
+                    "Can't borrow this book right now, either it doesn't exist or it's out of stock",
+                );
 
             // check if the user/borrower exists
             const borrower = await BorrowerModel.getBorrowerById(user_id);
 
             if (!borrower) throw new NotFoundError("Borrower not found");
 
+            // decrease the book quantity by 1
             const updatedBook = await BookModel.updateBookQuantity(
                 client,
                 book.id,
-                book.quantity - 1,
+                -1,
             );
             const borrowing = await BookModel.createBorrowing(
                 client,
@@ -220,30 +228,34 @@ export class BookModel {
     }
     // return a book by id, update the borrowing record set the returned_at to NOW() and status to returned
     static async returnBook(
-        borrowerid: number,
-        id: number,
+        borrowerId: number,
+        borrowingId: number,
     ): Promise<Borrowing> {
         // if the book already returned or the borrower didn't borrow it, throw an error
         // use a transaction to update the borrowing record and the book quantity
         const borrowing = await database.runTransaction(async (client) => {
-            const sql = `
+            // check if the user is the one who borrowed the book
+            let sql = `
+                SELECT * FROM borrowing
+                WHERE id = $1 AND borrower_id = $2 AND returned_at IS NULL;
+            `;
+
+            let result = await client.query(sql, [borrowingId, borrowerId]);
+            if (!result.rows.length)
+                throw new ForbiddenError("You can't return this book");
+
+            // update the borrowing record
+            sql = `
                 UPDATE borrowing
                 SET returned_at = NOW()
-                WHERE book_id = $1 AND borrower_id = $2 AND returned_at IS NULL
+                WHERE id = $1
                 RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
             `;
-            const result = await client.query(sql, [id, borrowerid]);
-            if (!result.rows.length)
-                throw new ForbiddenError(
-                    "Book either returned or not borrowed",
-                );
+            result = await client.query(sql, [borrowingId]);
+            const borrowing = result.rows[0];
 
-            const book = await BookModel.getBookByIdForUpdate(client, id);
-            await BookModel.updateBookQuantity(
-                client,
-                book.id,
-                book.quantity + 1,
-            );
+            // increase the book quantity by 1
+            await BookModel.updateBookQuantity(client, borrowing.book_id, 1);
             return result.rows[0];
         });
         return borrowing;
