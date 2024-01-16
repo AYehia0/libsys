@@ -9,7 +9,16 @@ on:
       - '.gitignore'
       - '.assets/**'
 jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
   lint:
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,6 +28,7 @@ jobs:
         run: npm run lint
 
   test:
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
