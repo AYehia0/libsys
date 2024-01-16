@@ -60,7 +60,6 @@ export const updateBookById = async (
     return book;
 };
 
-// the book can be borrowed by a user
 export const borrowBook = async (
     id: number,
     user_id: number,
@@ -69,7 +68,7 @@ export const borrowBook = async (
     return borrowing;
 };
 
-// the book can be returned by a user
+// the book can be returned by a user using the borrowing ticket
 export const returnBook = async (
     borrowerid: number,
     id: number,
