@@ -9,6 +9,23 @@ on:
       - '.gitignore'
       - '.assets/**'
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Linting
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Testing
+        run: npm test
   deploy:
     runs-on: ubuntu-latest
 
