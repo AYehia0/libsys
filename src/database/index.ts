@@ -2,10 +2,11 @@
 import createPgDatabase from "./postgres";
 
 export interface Database {
-    runQuery: (sql: string, params?: unknown[]) => Promise<unknown>;
-    runTransaction: (
-        callback: (client: unknown) => Promise<unknown>,
-    ) => Promise<unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    runQuery: (sql: string, params?: unknown[]) => Promise<any>;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    runTransaction: (callback: (client: any) => Promise<any>) => Promise<any>;
     runMigrations: () => Promise<void>;
     closeConnection: () => Promise<void>;
 }
