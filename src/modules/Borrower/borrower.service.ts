@@ -43,8 +43,8 @@ export const loginBorrower = async (
 
 export const updateBorrower = async (
     id: number,
-    borrower: BorrowerItem,
-): Promise<Boolean> => {
+    borrower: Partial<BorrowerItem>,
+): Promise<boolean> => {
     return await BorrowerModel.updateBorrower(id, borrower);
 };
 
@@ -52,7 +52,7 @@ export const getBorrowerById = async (id: number): Promise<Borrower> => {
     return await BorrowerModel.getBorrowerById(id);
 };
 
-export const deleteBorrowerById = async (id: number): Promise<Boolean> => {
+export const deleteBorrowerById = async (id: number): Promise<boolean> => {
     return await BorrowerModel.deleteBorrowerById(id);
 };
 

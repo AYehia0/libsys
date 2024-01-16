@@ -32,19 +32,14 @@ export class BorrowerModel {
     // update borrower details by id or email
     static async updateBorrower(
         id: number,
-        borrower: BorrowerItem,
-    ): Promise<Boolean> {
-        // check for existing emails and exclude the current borrower's email from the check
+        borrower: Partial<BorrowerItem>,
+    ): Promise<boolean> {
+        // update the borrower in the database, only given fields
         const sql = `
             UPDATE borrowers
-            SET name = $1, email = $2
+            SET name = COALESCE($1, name), email = COALESCE($2, email)
             WHERE id = $3
-              AND NOT EXISTS (
-                SELECT 1
-                FROM borrowers
-                WHERE email = $2 AND id <> $3
-              )
-            RETURNING id, name, email, created_at;
+            RETURNING id, name, email;
         `;
 
         const result = await database.runQuery(sql, [
@@ -71,7 +66,7 @@ export class BorrowerModel {
         const result = await database.runQuery(sql, [id]);
         return result.rows[0];
     }
-    static async deleteBorrowerById(id: number): Promise<Boolean> {
+    static async deleteBorrowerById(id: number): Promise<boolean> {
         const sql = `
             DELETE FROM borrowers
             WHERE id = $1;

@@ -25,12 +25,12 @@ export const initServer = async <T extends Express, U extends Database>(
             break;
         default:
             const port = parseInt(process.env.PORT as string, 10) || 3000;
-            app.listen(port, () => {
+            app.listen(port, async () => {
                 console.log(
                     `Listening on port ${port}, running on: ${process.env.NODE_ENV}`,
                 );
                 console.log("Running db migrations...");
-                database.runMigrations();
+                await database.runMigrations();
             });
             break;
     }

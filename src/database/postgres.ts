@@ -1,5 +1,5 @@
 import path from "path";
-import { Pool } from "pg";
+import { Pool, PoolClient } from "pg";
 import { migrate } from "postgres-migrations";
 import { Database } from "./index";
 import { poolConfig } from "./config";
@@ -20,7 +20,9 @@ const createPgDatabase = (): Database => {
             }
         },
         // FIXME: fix the types here
-        runTransaction: async (callback: (client: any) => Promise<any>) => {
+        runTransaction: async (
+            callback: (client: PoolClient) => Promise<any>,
+        ) => {
             const client = await pool.connect();
             try {
                 await client.query("BEGIN");
@@ -46,6 +48,9 @@ const createPgDatabase = (): Database => {
                 // release the client back to the pool to accept requests
                 client.release();
             }
+        },
+        closeConnection: async () => {
+            await pool.end();
         },
     };
 };

@@ -6,6 +6,7 @@
 // search for a book by title, author, genre, or isbn
 
 // import the database connection
+import { PoolClient } from "pg";
 import database from "../../database";
 import {
     ConflictError,
@@ -28,6 +29,7 @@ export interface BookItem {
 // Separation for senerios where we need to assert a book without an id
 export interface Book extends BookItem {
     id: number;
+    created_at: Date;
 }
 
 export interface BorrowingItem {
@@ -42,11 +44,11 @@ export interface Borrowing extends BorrowingItem {
 }
 
 export class BookModel {
-    public static async saveBook(book: Omit<Book, "id">): Promise<Book> {
+    public static async saveBook(book: BookItem): Promise<Book> {
         const sql = `
             INSERT INTO books (isbn, title, author, genre, quantity, shelf_location)
             VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id, isbn, title, author, genre, quantity, shelf_location;
+            RETURNING id, isbn, title, author, genre, quantity, shelf_location, created_at;
         `;
 
         const result = await database.runQuery(sql, [
@@ -130,7 +132,10 @@ export class BookModel {
     }
     // update a book in the database by id
     // given id and the book details, there could be missing details, only update the ones that are provided
-    public static async updateBookById(bookid: number, book: BookItem) {
+    public static async updateBookById(
+        bookid: number,
+        book: Partial<BookItem>,
+    ) {
         const sql = `
             UPDATE books
             SET isbn = COALESCE($1, isbn),
@@ -154,7 +159,7 @@ export class BookModel {
         return result.rows[0];
     }
     private static async getBookByIdForUpdate(
-        client: any,
+        client: PoolClient,
         id: number,
     ): Promise<Book> {
         const sql = `
@@ -166,7 +171,7 @@ export class BookModel {
         return result.rows[0];
     }
     private static async updateBookQuantity(
-        client: any,
+        client: PoolClient,
         id: number,
         updown: number,
     ): Promise<Book> {
@@ -181,7 +186,7 @@ export class BookModel {
         return result.rows[0];
     }
     private static async createBorrowing(
-        client: any,
+        client: PoolClient,
         book_id: number,
         user_id: number,
     ): Promise<Borrowing> {
@@ -196,33 +201,35 @@ export class BookModel {
 
     static async borrowBook(id: number, user_id: number): Promise<Borrowing> {
         // use the database.runTransaction function to run the transaction
-        const borrowing = await database.runTransaction(async (client) => {
-            // get the book by id and lock the row for update
-            const book = await BookModel.getBookByIdForUpdate(client, id);
-            // check if the book isn't null
-            if (!book || book.quantity <= 0)
-                throw new ConflictError(
-                    "Can't borrow this book right now, either it doesn't exist or it's out of stock",
+        const borrowing = await database.runTransaction(
+            async (client: PoolClient) => {
+                // get the book by id and lock the row for update
+                const book = await BookModel.getBookByIdForUpdate(client, id);
+                // check if the book isn't null
+                if (!book || book.quantity <= 0)
+                    throw new ConflictError(
+                        "Can't borrow this book right now, either it doesn't exist or it's out of stock",
+                    );
+
+                // check if the user/borrower exists
+                const borrower = await BorrowerModel.getBorrowerById(user_id);
+
+                if (!borrower) throw new NotFoundError("Borrower not found");
+
+                // decrease the book quantity by 1
+                const updatedBook = await BookModel.updateBookQuantity(
+                    client,
+                    book.id,
+                    -1,
                 );
-
-            // check if the user/borrower exists
-            const borrower = await BorrowerModel.getBorrowerById(user_id);
-
-            if (!borrower) throw new NotFoundError("Borrower not found");
-
-            // decrease the book quantity by 1
-            const updatedBook = await BookModel.updateBookQuantity(
-                client,
-                book.id,
-                -1,
-            );
-            const borrowing = await BookModel.createBorrowing(
-                client,
-                updatedBook.id,
-                user_id,
-            );
-            return borrowing;
-        });
+                const borrowing = await BookModel.createBorrowing(
+                    client,
+                    updatedBook.id,
+                    user_id,
+                );
+                return borrowing;
+            },
+        );
 
         return borrowing;
     }
@@ -233,31 +240,37 @@ export class BookModel {
     ): Promise<Borrowing> {
         // if the book already returned or the borrower didn't borrow it, throw an error
         // use a transaction to update the borrowing record and the book quantity
-        const borrowing = await database.runTransaction(async (client) => {
-            // check if the user is the one who borrowed the book
-            let sql = `
+        const borrowing = await database.runTransaction(
+            async (client: PoolClient) => {
+                // check if the user is the one who borrowed the book
+                let sql = `
                 SELECT * FROM borrowing
                 WHERE id = $1 AND borrower_id = $2 AND returned_at IS NULL;
             `;
 
-            let result = await client.query(sql, [borrowingId, borrowerId]);
-            if (!result.rows.length)
-                throw new ForbiddenError("You can't return this book");
+                let result = await client.query(sql, [borrowingId, borrowerId]);
+                if (!result.rows.length)
+                    throw new ForbiddenError("You can't return this book");
 
-            // update the borrowing record
-            sql = `
+                // update the borrowing record
+                sql = `
                 UPDATE borrowing
                 SET returned_at = NOW()
                 WHERE id = $1
                 RETURNING id, book_id, borrower_id, borrowed_at, returned_at, due_at;
             `;
-            result = await client.query(sql, [borrowingId]);
-            const borrowing = result.rows[0];
+                result = await client.query(sql, [borrowingId]);
+                const borrowing = result.rows[0];
 
-            // increase the book quantity by 1
-            await BookModel.updateBookQuantity(client, borrowing.book_id, 1);
-            return result.rows[0];
-        });
+                // increase the book quantity by 1
+                await BookModel.updateBookQuantity(
+                    client,
+                    borrowing.book_id,
+                    1,
+                );
+                return result.rows[0];
+            },
+        );
         return borrowing;
     }
 
