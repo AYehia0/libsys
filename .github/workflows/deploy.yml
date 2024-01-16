@@ -32,7 +32,7 @@ jobs:
         run: npm i
 
       - name: Testing
-        run: npm test
+        run: ./test.sh
   deploy:
     runs-on: ubuntu-latest
 

@@ -6,7 +6,6 @@ import * as BookService from "./book.service";
 import { registerBorrower } from "../Borrower/borrower.service";
 import createPgDatabase from "../../database/index";
 import { BookItem } from "./book.model";
-import { poolConfig } from "../../database/config";
 
 beforeAll(async () => {
     await createPgDatabase.runMigrations();
@@ -28,7 +27,6 @@ describe("Book module", () => {
             isbn: "9780132350884",
         };
 
-        console.log(poolConfig);
         // testing the service layer only
         const addedBook = await BookService.addBook(book);
         expect(addedBook).toBeTruthy();

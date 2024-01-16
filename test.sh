@@ -6,9 +6,6 @@
 # run the dev docker-compose file with .env.test
 docker-compose -f docker-compose.test.yml --env-file .test.env up -d --build 
 
-# wait for the database to be ready ?, maybe this will fix : getaddrinfo EAI_AGAIN db
-sleep 10
-
 # run the tests
 npm run test
 
