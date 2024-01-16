@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import { BadRequestError, UnauthorizedError } from "../utils/controller.errors";
 import { jsonResponse } from "../utils/status";
+import { TokenExpiredError } from "jsonwebtoken";
 
 // TODO: refactor this to use the error classes
 export const catchAuthErrors = (
@@ -11,6 +12,11 @@ export const catchAuthErrors = (
     next: NextFunction,
 ) => {
     switch (err.constructor) {
+        case TokenExpiredError:
+            return res
+                .status(401)
+                .json(jsonResponse("error", 401, "Token has expired"));
+
         case BadRequestError:
             return res
                 .status(400)
