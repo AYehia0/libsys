@@ -4,7 +4,7 @@
 # tests in a test database. It is used by the CI system.
 
 # run the dev docker-compose file with .env.test
-docker-compose -f docker-compose.test.yml --env-file .test.env up -d --build 
+docker-compose -f docker-compose.test.yml --env-file .test.env up -d --build && docker-compose -f docker-compose.test.yml logs -f
 
 # run the tests
 npm run test
