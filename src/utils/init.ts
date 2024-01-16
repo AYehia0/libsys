@@ -37,7 +37,7 @@ export const initServer = async <T extends Express, U extends Database>(
     }
     return {
         start: () => {
-            console.log("Server has been started");
+            console.log("Server has been started 🚀");
         },
     };
 };
