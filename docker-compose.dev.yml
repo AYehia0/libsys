@@ -6,7 +6,7 @@ services:
     # build the image from the dockerfile we created
     build: .
     environment:
-      - NODE_ENV=cats_hehe
+      - NODE_ENV=dev
     ports:
       - ${PORT}:${PORT}
     depends_on:
