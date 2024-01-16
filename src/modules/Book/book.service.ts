@@ -4,20 +4,11 @@
 
 // import the book model
 import { NotFoundError } from "../../utils/controller.errors";
-import { BookItem, BookModel, Borrowing } from "./book.model";
+import { Book, BookItem, BookModel, Borrowing } from "./book.model";
 
 // add a book to the database
 // for now we don't have a database so we will just return the book
-export const addBook = async (body: any): Promise<BookItem> => {
-    const book: BookItem = {
-        isbn: body.isbn,
-        title: body.title,
-        author: body.author,
-        genre: body.genre,
-        quantity: body.quantity as number,
-        shelf_location: body.shelf_location,
-    };
-
+export const addBook = async (book: BookItem): Promise<Book> => {
     // add the book to the database
     const savedBook = await BookModel.saveBook(book);
     return savedBook;
@@ -50,8 +41,8 @@ export const searchBook = async (
 
 export const updateBookById = async (
     id: number,
-    body: BookItem,
-): Promise<BookItem> => {
+    body: Partial<BookItem>,
+): Promise<Book> => {
     // check if the book exists
     const bookExists = await BookModel.getBookById(id);
     // TODO: have a nice error handling one
