@@ -7,6 +7,7 @@ import { poolConfig } from "./config";
 const createPgDatabase = (): Database => {
     const pool = new Pool(poolConfig);
     return {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         runQuery: async (sql: string, params?: any[]) => {
             const client = await pool.connect();
             try {
@@ -19,8 +20,8 @@ const createPgDatabase = (): Database => {
                 client.release();
             }
         },
-        // FIXME: fix the types here
         runTransaction: async (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             callback: (client: PoolClient) => Promise<any>,
         ) => {
             const client = await pool.connect();

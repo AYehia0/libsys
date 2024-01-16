@@ -4,7 +4,7 @@ export const jsonResponse = (
     status: string,
     statusCode: number,
     message: string,
-    details?: any,
+    details?: unknown,
 ) => {
     return {
         status,
