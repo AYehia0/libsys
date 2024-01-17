@@ -1,0 +1,14 @@
+name: Run tests
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install
+        run: npm i
+
+      - name: Testing
+        run: ./test.sh

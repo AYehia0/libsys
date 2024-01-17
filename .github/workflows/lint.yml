@@ -1,0 +1,14 @@
+name: Run the linter
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install
+        run: npm i
+
+      - name: Linting
+        run: npm run lint
