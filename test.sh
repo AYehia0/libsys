@@ -7,7 +7,7 @@
 docker-compose -f docker-compose.test.yml --env-file .test.env up -d --build
 
 echo "Waiting for the database to be ready..."
-./wait-for-it.sh -t 0 db:5432
+./wait-for-it.sh -t 15 db:5432 -- echo "Database is ready!"
 
 # run the tests
 echo "Running tests..."
