@@ -20,7 +20,10 @@ export const getAllBooksQuerySchema = z.object({
         .string()
         .regex(/^\d+$/)
         .default(String(MAX_BOOK_LIMIT))
-        .transform(Number),
+        .transform(Number)
+        .refine((val) => val <= MAX_BOOK_LIMIT, {
+            message: `limit must be less than or equal to ${MAX_BOOK_LIMIT}`,
+        }),
 });
 
 export const getBookByIdSchema = z.string().regex(/^\d+$/).transform(Number);
@@ -36,5 +39,9 @@ export const getSearchQuerySchema = z.object({
         .string()
         .regex(/^\d+$/)
         .default(String(MAX_BOOK_LIMIT))
-        .transform(Number),
+        .transform(Number)
+
+        .refine((val) => val <= MAX_BOOK_LIMIT, {
+            message: `limit must be less than or equal to ${MAX_BOOK_LIMIT}`,
+        }),
 });
